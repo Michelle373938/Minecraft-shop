@@ -1,50 +1,40 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const productsEl = document.getElementById('products')
-  const cartCountEl = document.getElementById('cartCount')
-  const cartItemsEl = document.getElementById('cartItems')
-  const cartModal = document.getElementById('cartModal')
-  const cartBtn = document.getElementById('cartBtn')
-  const closeCart = document.getElementById('closeCart')
+const productGrid = document.getElementById('productGrid');
+const cartBtn = document.getElementById('cartBtn');
+const cartCount = document.getElementById('cartCount');
+const cartModal = document.getElementById('cartModal');
+const closeCart = document.getElementById('closeCart');
+const cartItems = document.getElementById('cartItems');
+const cartTotal = document.getElementById('cartTotal');
+const checkoutBtn = document.getElementById('checkoutBtn');
 
-  const cart = {}
+let cart = {};
 
+function loadItems() {
   fetch('items.json')
     .then(r => r.json())
     .then(items => {
       items.forEach(item => {
-        const div = document.createElement('div')
-        div.className = 'product'
+        const div = document.createElement('div');
+        div.className = 'product';
         div.innerHTML = `
           <img src="${item.image}" alt="${item.name}">
           <h3>${item.name}</h3>
-          <p>€${item.price}</p>
+          <p>${item.price.toFixed(2)} €</p>
           <button data-id="${item.id}">In den Warenkorb</button>
-        `
-        productsEl.appendChild(div)
-      })
-    })
+        `;
+        productGrid.appendChild(div);
+      });
+    });
+}
 
-  productsEl.addEventListener('click', e => {
-    if (e.target.tagName === 'BUTTON') {
-      const id = e.target.dataset.id
-      const item = items.find(i => i.id === id)
-      cart[id] = (cart[id] || 0) + 1
-      updateCart()
-    }
-  })
+function updateCartCount() {
+  const totalQty = Object.values(cart).reduce((sum, item) => sum + item.qty, 0);
+  cartCount.textContent = totalQty;
+}
 
-  function updateCart() {
-    const count = Object.values(cart).reduce((a,b)=>a+b,0)
-    cartCountEl.textContent = count
-    cartItemsEl.innerHTML = ''
-    Object.entries(cart).forEach(([id, qty]) => {
-      const item = items.find(i => i.id === id)
-      const li = document.createElement('li')
-      li.textContent = `${item.name} × ${qty}`
-      cartItemsEl.appendChild(li)
-    })
-  }
-
-  cartBtn.addEventListener('click', () => cartModal.classList.toggle('hidden'))
-  closeCart.addEventListener('click', () => cartModal.classList.add('hidden'))
-})
+function renderCart() {
+  cartItems.innerHTML = '';
+  let total = 0;
+  for (const [id, item] of Object.entries(cart)) {
+    const li = document.createElement('li');
+    li.textContent = `${item.name} x${item.qty} – ${(item.price * item.qty
