@@ -1,40 +1,33 @@
-const productGrid = document.getElementById('productGrid');
+// Datenmodell
+const cart = [];
+
+// Elemente holen
+const productsEl = document.getElementById('products');
 const cartBtn = document.getElementById('cartBtn');
-const cartCount = document.getElementById('cartCount');
+const cartCountEl = document.getElementById('cartCount');
 const cartModal = document.getElementById('cartModal');
 const closeCart = document.getElementById('closeCart');
-const cartItems = document.getElementById('cartItems');
-const cartTotal = document.getElementById('cartTotal');
+const cartItemsEl = document.getElementById('cartItems');
+const cartTotalEl = document.getElementById('cartTotal');
 const checkoutBtn = document.getElementById('checkoutBtn');
 
-let cart = {};
+// Produkte laden
+fetch('items.json')
+  .then(res => res.json())
+  .then(items => {
+    items.forEach(item => addProductCard(item));
+  })
+  .catch(err => console.error('Fehler beim Laden der Produkte:', err));
 
-function loadItems() {
-  fetch('items.json')
-    .then(r => r.json())
-    .then(items => {
-      items.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'product';
-        div.innerHTML = `
-          <img src="${item.image}" alt="${item.name}">
-          <h3>${item.name}</h3>
-          <p>${item.price.toFixed(2)} €</p>
-          <button data-id="${item.id}">In den Warenkorb</button>
-        `;
-        productGrid.appendChild(div);
-      });
-    });
-}
-
-function updateCartCount() {
-  const totalQty = Object.values(cart).reduce((sum, item) => sum + item.qty, 0);
-  cartCount.textContent = totalQty;
-}
-
-function renderCart() {
-  cartItems.innerHTML = '';
-  let total = 0;
-  for (const [id, item] of Object.entries(cart)) {
-    const li = document.createElement('li');
-    li.textContent = `${item.name} x${item.qty} – ${(item.price * item.qty
+// Produktkarte erzeugen
+function addProductCard(item) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `
+    <img src="${item.image}" alt="${item.name}">
+    <h3>${item.name}</h3>
+    <p>${item.price} Diamanten</p>
+    <button data-id="${item.id}">In den Warenkorb</button>
+  `;
+  card.querySelector('button').addEventListener('click', () => addToCart(item));
+  productsEl
